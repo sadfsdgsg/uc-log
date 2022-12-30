@@ -36,16 +36,16 @@
     }
 
     #if DEBUG >= USE_LOG_LEVEL
-        #define log_debug(x)    print("[DEBUG] ");     __log_print_stump();    println(x)
+        #define log_debug(x)    print("[DEBUG] ");     __log_print_stump();    print_ln(x)
     #endif
     #if INFO >= USE_LOG_LEVEL
-        #define log_info(x)     print("[INFO] ");      __log_print_stump();    println(x)
+        #define log_info(x)     print("[INFO] ");      __log_print_stump();    print_ln(x)
     #endif
     #if WARN >= USE_LOG_LEVEL
-        #define log_warn(x)     print("[WARN] ");      __log_print_stump();    println(x)
+        #define log_warn(x)     print("[WARN] ");      __log_print_stump();    print_ln(x)
     #endif
     #if CRITICAL >= USE_LOG_LEVEL
-        #define log_critical(x) print("[CRITICAL] ");  __log_print_stump();    println(x)
+        #define log_critical(x) print("[CRITICAL] ");  __log_print_stump();    print_ln(x)
     #endif
 #endif
 
