@@ -7,7 +7,7 @@
 #define CRITICAL 4
 
 //technical spec:
-#define BAUD_RATE 38400
+#define BAUD_RATE 115200
 #define LOGGER_MAX_MESSAGE_LENGTH 150
 
 /**
@@ -35,7 +35,7 @@
         #include "Arduino.h"
         #define log_begin() while (!Serial) Serial.begin(BAUD_RATE); logf_info("Serial connection initialized, logging enabled, loglevel: %d", USE_LOG_LEVEL);
         #define PRINT_METHOD(x) Serial.print(x);
-        #define MILLIS_FUNCTION millis()
+        #define MILLIS_FUNCTION millis
     #else
         #error please define the "PRINT_METHOD" which will be used for printing/logging your messages.(in case of Arduino this defaults to Serial.print(x))
         #undef USE_LOGGER
@@ -52,7 +52,7 @@
             va_start(args, msg);
             vsnprintf(buf, sizeof(buf), msg, args);
             va_end(args);
-            PRINT_METHOD(msg);
+            PRINT_METHOD(buf);
             PRINT_METHOD("\r\n");
         }
 
@@ -62,7 +62,7 @@
             va_start(args, msg);
             vsnprintf_P(buf, sizeof(buf), msg, args);
             va_end(args);
-            PRINT_METHOD(msg);
+            PRINT_METHOD(buf);
             PRINT_METHOD("\r\n");
         }
         
@@ -98,9 +98,9 @@
             #elif
                 #define DEBUG_FORMAT __printf_P(P_STR("[DEBUG] %s:%s\r\n\t"), __FILE__, __LINE__);
             #endif
-            #define log_debug(x)             DEBUG_FORMAT __println(x);
-            #define logf_debug(x, args...)   DEBUG_FORMAT __printf(x, args);
-            #define logf_P_debug(x, args...) DEBUG_FORMAT __printf_P(x, args);
+            #define log_debug(x)             DEBUG_FORMAT; __println(x);
+            #define logf_debug(x, args...)   DEBUG_FORMAT; __printf(x, args);
+            #define logf_P_debug(x, args...) DEBUG_FORMAT; __printf_P(x, args);
         #endif
 
         #if INFO >= USE_LOG_LEVEL
@@ -111,13 +111,13 @@
         #endif
         #if WARN >= USE_LOG_LEVEL
             #ifdef MILLIS_FUNCTION
-                #define WARN_FORMAT __printf_P(PSTR("[WARN] time: %lu; %s:%d\r\n\t"), MILLIS_FUNCTION, __FILE__, __LINE__);
+                #define WARN_FORMAT __printf_P(PSTR("[WARN] time: %lu; %s:%d\r\n\t"), MILLIS_FUNCTION(), __FILE__, __LINE__);
             #elif
                 #define WARN_FORMAT __printf_P(P_STR("[WARN] %s:%s\r\n\t"), __FILE__, __LINE__);
             #endif
-            #define log_warn(x)             WARN_FORMAT __println(x);
-            #define logf_warn(x, args...)   WARN_FORMAT __printf(x, args);
-            #define logf_P_warn(x, args...) WARN_FORMAT __printf_P(x, args);
+            #define log_warn(x)             WARN_FORMAT; __println(x);
+            #define logf_warn(x, args...)   WARN_FORMAT; __printf(x, args);
+            #define logf_P_warn(x, args...) WARN_FORMAT; __printf_P(x, args);
         #endif
         #if CRITICAL >= USE_LOG_LEVEL
             #ifdef MILLIS_FUNCTION
