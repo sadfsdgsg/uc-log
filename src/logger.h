@@ -130,25 +130,25 @@
         #define logf_critical(x, args...)   CRITICAL_FORMAT; __printf(x, args);
         #define logf_P_critical(x, args...) CRITICAL_FORMAT; __printf_P(x, args);
     #endif
-#endif
+    #else
+    #ifndef log_begin()
+        #define log_begin()
+    #endif
+    #ifndef log_debug(x)
+        #define log_debug(x)
+        #define logf_debug(x, args...)
+    #endif
 
-#ifndef log_begin()
-    #define log_begin()
-#endif
-#ifndef log_debug(x)
-    #define log_debug(x)
-    #define logf_debug(x, args...)
-#endif
-
-#ifndef log_info(x)
-    #define log_info(x)
-    #define logf_info(x, args...)
-#endif
-#ifndef log_warn(x)
-    #define log_warn(x)
-    #define logf_warn(x, args...)
-#endif
-#ifndef log_critical(x)
-    #define log_critical(x)
-    #define logf_critical(x, args...)
+    #ifndef log_info(x)
+        #define log_info(x)
+        #define logf_info(x, args...)
+    #endif
+    #ifndef log_warn(x)
+        #define log_warn(x)
+        #define logf_warn(x, args...)
+    #endif
+    #ifndef log_critical(x)
+        #define log_critical(x)
+        #define logf_critical(x, args...)
+    #endif
 #endif
