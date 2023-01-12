@@ -29,21 +29,23 @@
 #define USE_LOGGER
 #define USE_LOG_LEVEL DEBUG
 
-#ifdef USE_LOGGER
-    #include <stdio.h>
-    #include <stdarg.h>     /* va_list, va_start, va_arg, va_end */
-
-    #undef ARDUINO
-    #ifndef PRINT_METHOD
+#undef ARDUINO
+#ifndef PRINT_METHOD
         #ifdef ARDUINO
             #include "Arduino.h"
             #define log_begin() while (!Serial) Serial.begin(BAUD_RATE); logf_info("Serial connection initialized, logging enabled, loglevel: %d", USE_LOG_LEVEL);
             #define PRINT_METHOD(x) Serial.print(x);
             #define MILLIS_FUNCTION millis()
         #else
-            #error please define the "PRINT_METHOD" which will be used for printing/logging your messages.(in case of Arduino this defaults to Serial.prin(x))
+            #error please define the "PRINT_METHOD" which will be used for printing/logging your messages.(in case of Arduino this defaults to Serial.print(x))
+            #undef USE_LOGGER
         #endif
     #endif
+#endif
+
+#ifdef USE_LOGGER
+    #include <stdio.h>
+    #include <stdarg.h>     /* va_list, va_start, va_arg, va_end */
 
     void __print(const char* msg){
         PRINT_METHOD(msg);
