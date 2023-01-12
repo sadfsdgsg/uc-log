@@ -7,13 +7,14 @@
 #define CRITICAL 4
 
 //technical spec:
-#define BAUD_RATE 115200
+#define BAUD_RATE 38400
+#define LOGGER_MAX_MESSAGE_LENGTH 150
 
 /**
  * available functions: 
  * log_begin() starts the Serial communication.
  * log_xxx() logs a message on the defined log level.
- * 
+ *  
  * log_begin()
  * log_debug(x)
  * log_info(x)
@@ -23,52 +24,109 @@
  * user defined configuration:
  * If you want to debug via serial port at all, uncomment "USE_DEBUG".
  * Set "USE_LOG_LEVEL" to show the messages with according level(and higher)
+ * If you want to use this logger without Arduino 
  */
 #define USE_LOGGER
-#define USE_LOG_LEVEL INFO
-
-
-/**
- * Implementation part
- * At the moment totally relies on HardwareSerial.h...
- */
+#define USE_LOG_LEVEL DEBUG
 
 #ifdef USE_LOGGER
-    #include "HardwareSerial.h"
+    #include <stdio.h>
     #include <stdarg.h>     /* va_list, va_start, va_arg, va_end */
 
-    void __log_print_stump(){
-        Serial.print(__FILE__);
-        Serial.print(":");
-        Serial.println(__LINE__);
-        Serial.print("\t");
-    }
+    #undef ARDUINO
+    #ifndef PRINT_METHOD
+        #ifdef ARDUINO
+            #include "Arduino.h"
+            #define log_begin() while (!Serial) Serial.begin(BAUD_RATE); logf_info("Serial connection initialized, logging enabled, loglevel: %d", USE_LOG_LEVEL);
+            #define PRINT_METHOD(x) Serial.print(x);
+            #define MILLIS_FUNCTION millis()
+        #else
+            #error please define the "PRINT_METHOD" which will be used for printing/logging your messages.(in case of Arduino this defaults to Serial.prin(x))
+        #endif
+    #endif
 
-    void __print_ln(const char* msg){
-        Serial.println(msg);
-    }
     void __print(const char* msg){
-        Serial.print(msg);
+        PRINT_METHOD(msg);
+    }
+    void __print(int msg){
+        __printf("%d", msg);
+    }
+    void __print(long msg){
+        __printf("%d", msg);
+    }
+    void __print(unsigned int msg){
+        __printf("%u", msg);
+    }
+    void __print(unsigned long msg){
+        __printf("%u", msg);
+    }
+    void __print(float msg){
+        __printf("%f", msg);
+    }
+    void __print(double msg){
+        __printf("%f", msg);
+    }
+    void __println(const char* msg){
+        PRINT_METHOD(msg);
+        PRINT_METHOD("\r\n");
     }
 
-    #define log_begin() while (!Serial) Serial.begin(BAUD_RATE); log_debug("Serial connection initialized!");
+    void __printf(const char* msg, ...){
+        char buf[LOGGER_MAX_MESSAGE_LENGTH];
+        va_list args;
+        va_start(args, msg);
+        vsnprintf(buf, sizeof(buf), msg, args);
+        va_end(args);
+        PRINT_METHOD(msg);
+        PRINT_METHOD("\r\n");
+    }
 
+    void __printf_P(const char* msg, ...){
+        char buf[LOGGER_MAX_MESSAGE_LENGTH];
+        va_list args;
+        va_start(args, msg);
+        vsnprintf_P(buf, sizeof(buf), msg, args);
+        va_end(args);
+        PRINT_METHOD(msg);
+        PRINT_METHOD("\r\n");
+    }
+    
     #if DEBUG >= USE_LOG_LEVEL
-        #define log_debug(x)                Serial.print("[DEBUG] ");     __log_print_stump();   Serial.println(x);
-        #define logf_debug(x, args...)      Serial.print("[DEBUG] ");     __log_print_stump();   Serial.printf(x, args); Serial.println();
+        #ifdef MILLIS_FUNCTION
+            #define DEBUG_FORMAT __printf_P(PSTR("[DEBUG] time: %lu; %s:%d\r\n\t"), MILLIS_FUNCTION(), __FILE__, __LINE__);
+        #elif
+            #define DEBUG_FORMAT __printf_P(P_STR("[DEBUG] %s:%s\r\n\t"), __FILE__, __LINE__);
+        #endif
+        #define log_debug(x)             DEBUG_FORMAT __println(x);
+        #define logf_debug(x, args...)   DEBUG_FORMAT __printf(x, args);
+        #define logf_P_debug(x, args...) DEBUG_FORMAT __printf_P(x, args);
     #endif
 
     #if INFO >= USE_LOG_LEVEL
-        #define log_info(x)                 Serial.print("[INFO] ");      __log_print_stump();   Serial.println(x);
-        #define logf_info(x, args...)       Serial.print("[INFO] ");      __log_print_stump();   Serial.printf(x, args); Serial.println();
+        #define INFO_FORMAT __print("[INFO] ");
+        #define log_info(x)             INFO_FORMAT; __println(x);
+        #define logf_info(x, args...)   INFO_FORMAT; __printf(x, args);
+        #define logf_P_info(x, args...) INFO_FORMAT; __printf_P(x, args);
     #endif
     #if WARN >= USE_LOG_LEVEL
-        #define log_warn(x)                 Serial.print("[WARN] ");      __log_print_stump();   Serial.println(x);
-        #define logf_warn(x, args...)       Serial.print("[WARN] ");      __log_print_stump();   Serial.printf(x, args); Serial.println();
+        #ifdef MILLIS_FUNCTION
+            #define WARN_FORMAT __printf_P(PSTR("[WARN] time: %lu; %s:%d\r\n\t"), MILLIS_FUNCTION(), __FILE__, __LINE__);
+        #elif
+            #define WARN_FORMAT __printf_P(P_STR("[WARN] %s:%s\r\n\t"), __FILE__, __LINE__);
+        #endif
+        #define log_warn(x)             WARN_FORMAT __println(x);
+        #define logf_warn(x, args...)   WARN_FORMAT __printf(x, args);
+        #define logf_P_warn(x, args...) WARN_FORMAT __printf_P(x, args);
     #endif
     #if CRITICAL >= USE_LOG_LEVEL
-        #define log_critical(x)             Serial.print("[CRITICAL] ");  __log_print_stump();   Serial.println(x);
-        #define logf_critical(x, args...)   Serial.print("[CRITICAL] ");  __log_print_stump();   Serial.printf(x, args); Serial.println();
+        #ifdef MILLIS_FUNCTION
+            #define CRITICAL_FORMAT __printf_P(PSTR("[CRITICAL] time: %lu; %s:%d\r\n\t"), MILLIS_FUNCTION(), __FILE__, __LINE__);
+        #elif
+            #define CRITICAL_FORMAT __printf(P_STR("[CRITICAL] %s:%s\r\n\t"), __FILE__, __LINE__);
+        #endif
+        #define log_critical(x)             CRITICAL_FORMAT; __println(x);
+        #define logf_critical(x, args...)   CRITICAL_FORMAT; __printf(x, args);
+        #define logf_P_critical(x, args...) CRITICAL_FORMAT; __printf_P(x, args);
     #endif
 #endif
 
