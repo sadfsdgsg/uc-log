@@ -24,14 +24,14 @@
  * log_critical(x)
  * 
  * If you want to use this logger without Arduino, simply do the following lines:
+ * Remember to 
  * __________
  * #define USE_LOGGER
  * #define USE_LOG_LEVEL DEBUG          //or a different log level (see above). This will display the messages of this and higher levels.
- * #define PRINT_FUNCTION Serial.print  //or wherever your output shall go
+ * #define PRINT_FUNCTION Serial.print  //a printfunction (Arduino's as example)
  * #define MILLIS_FUNCTION millis       //function for timestamp. Expected as milliseconds since boot, but everything else should work as well
  *___________
  */
-
 #ifndef PRINT_FUNCTION
     #ifdef ARDUINO
         #include "Arduino.h"
@@ -40,6 +40,12 @@
         #define MILLIS_FUNCTION millis
     #else
         #error please define the "PRINT_FUNCTION" which will be used for printing/logging your messages.(in case of Arduino this defaults to Serial.print(x))
+        #warning to get a custom setup running, you will need the following:
+        #warning Remember to initiate the connection in case of Serial connections. This will not be done by this logger!
+        #warning #define USE_LOGGER                   //to enable the logger at all
+        #warning #define USE_LOG_LEVEL DEBUG          //or a different log level (see above). This will print the messages of this and higher log levels.
+        #warning #define PRINT_FUNCTION Serial.print  //a printfunction (Arduino's as example)
+        #warning #define MILLIS_FUNCTION millis       //function for timestamp. Expected as milliseconds since boot, but everything else should work as well
         #undef USE_LOGGER
     #endif
 #endif
