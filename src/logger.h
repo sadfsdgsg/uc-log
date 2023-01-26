@@ -23,22 +23,15 @@
  * log_warn(x)
  * log_critical(x)
  * 
- * to get a full custom setup running, simply do the following lines:
+ * If you want to use this logger without Arduino, simply do the following lines:
  * __________
  * #define USE_LOGGER
- * #define USE_LOG_LEVEL DEBUG          //or a different log level (see above)
+ * #define USE_LOG_LEVEL DEBUG          //or a different log level (see above). This will display the messages of this and higher levels.
  * #define PRINT_FUNCTION Serial.print  //or wherever your output shall go
  * #define MILLIS_FUNCTION millis       //function for timestamp. Expected as milliseconds since boot, but everything else should work as well
  *___________
- * user defined configuration:
- * If you want to debug via serial port at all, uncomment "USE_DEBUG".
- * Set "USE_LOG_LEVEL" to show the messages with according level(and higher)
- * If you want to use this logger without Arduino 
  */
-//#define USE_LOGGER
-//#define USE_LOG_LEVEL DEBUG
 
-//#undef ARDUINO
 #ifndef PRINT_FUNCTION
     #ifdef ARDUINO
         #include "Arduino.h"
