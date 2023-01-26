@@ -7,7 +7,9 @@
 #define CRITICAL 4
 
 //technical spec:
-#define BAUD_RATE 115200
+#ifndef BAUD_RATE
+    #define BAUD_RATE 115200
+#endif
 #define LOGGER_MAX_MESSAGE_LENGTH 150
 
 /**
@@ -20,21 +22,28 @@
  * log_info(x)
  * log_warn(x)
  * log_critical(x)
- *
+ * 
+ * to get a full custom setup running, simply do the following lines:
+ * __________
+ * #define USE_LOGGER
+ * #define USE_LOG_LEVEL DEBUG          //or a different log level (see above)
+ * #define PRINT_FUNCTION Serial.print  //or wherever your output shall go
+ * #define MILLIS_FUNCTION millis       //function for timestamp. Expected as milliseconds since boot, but everything else should work as well
+ *___________
  * user defined configuration:
  * If you want to debug via serial port at all, uncomment "USE_DEBUG".
  * Set "USE_LOG_LEVEL" to show the messages with according level(and higher)
  * If you want to use this logger without Arduino 
  */
-#define USE_LOGGER
-#define USE_LOG_LEVEL DEBUG
+//#define USE_LOGGER
+//#define USE_LOG_LEVEL DEBUG
 
 //#undef ARDUINO
 #ifndef PRINT_FUNCTION
     #ifdef ARDUINO
         #include "Arduino.h"
         #define log_begin() while (!Serial) Serial.begin(BAUD_RATE); logf_info("Serial connection initialized, logging enabled, loglevel: %d", USE_LOG_LEVEL);
-        #define PRINT_FUNCTION(x) Serial.print(x);
+        #define PRINT_FUNCTION Serial.print;
         #define MILLIS_FUNCTION millis
     #else
         #error please define the "PRINT_FUNCTION" which will be used for printing/logging your messages.(in case of Arduino this defaults to Serial.print(x))
