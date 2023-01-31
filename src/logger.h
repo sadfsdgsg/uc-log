@@ -51,7 +51,7 @@
 #endif
 
 #ifdef USE_LOGGER
-        #include <stdio.h>      //vsnprintf, vsnprintf_P
+        #include <stdio.h>      //vsnprintf
         #include <stdarg.h>     /* va_list, va_start, va_arg, va_end */
 
         extern void __printf(const char* msg, ...){
@@ -59,15 +59,6 @@
             va_list args;
             va_start(args, msg);
             vsnprintf(buf, sizeof(buf), msg, args);
-            va_end(args);
-            PRINT_FUNCTION(buf);
-        }
-
-        void __printf_P(const char* msg, ...){
-            char buf[LOGGER_MAX_MESSAGE_LENGTH];
-            va_list args;
-            va_start(args, msg);
-            vsnprintf_P(buf, sizeof(buf), msg, args);
             va_end(args);
             PRINT_FUNCTION(buf);
         }
@@ -101,15 +92,14 @@
         #if DEBUG >= USE_LOG_LEVEL
             #ifndef DEBUG_FORMAT
                 #ifdef MILLIS_FUNCTION
-                    #define DEBUG_FORMAT __printf_P(PSTR("[DEBUG] time: %lu; %s:%d\n\r\t"), MILLIS_FUNCTION(), __FILE__, __LINE__);
+                    #define DEBUG_FORMAT __printf("[DEBUG] time: %lu; %s:%d\n\r\t", MILLIS_FUNCTION(), __FILE__, __LINE__);
                 #else
-                    #define DEBUG_FORMAT __printf_P(P_STR("[DEBUG] %s:%s\n\r\t"), __FILE__, __LINE__);
+                    #define DEBUG_FORMAT __printf("[DEBUG] %s:%s\n\r\t", __FILE__, __LINE__);
                 #endif
             #endif
             #define log_debug(x)             DEBUG_FORMAT; __print(x);
             #define log_debug_ln(x)          DEBUG_FORMAT; __println(x);
             #define logf_debug(x, args...)   DEBUG_FORMAT; __printf(x, args);
-            #define logf_P_debug(x, args...) DEBUG_FORMAT; __printf_P(x, args);
         #endif
 
         #if INFO >= USE_LOG_LEVEL
@@ -119,33 +109,30 @@
             #define log_info(x)             INFO_FORMAT; __print(x);
             #define log_info_ln(x)          INFO_FORMAT; __println(x);
             #define logf_info(x, args...)   INFO_FORMAT; __printf(x, args);
-            #define logf_P_info(x, args...) INFO_FORMAT; __printf_P(x, args);
         #endif
         #if WARN >= USE_LOG_LEVEL
             #ifndef WARN_FORMAT
                 #ifdef MILLIS_FUNCTION
-                    #define WARN_FORMAT __printf_P(PSTR("[WARN] time: %lu; %s:%d\r\n\t"), MILLIS_FUNCTION(), __FILE__, __LINE__);
+                    #define WARN_FORMAT __printf("[WARN] time: %lu; %s:%d\r\n\t", MILLIS_FUNCTION(), __FILE__, __LINE__);
                 #else
-                    #define WARN_FORMAT __printf_P(P_STR("[WARN] %s:%s\r\n\t"), __FILE__, __LINE__);
+                    #define WARN_FORMAT __printf("[WARN] %s:%s\r\n\t", __FILE__, __LINE__);
                 #endif
             #endif
             #define log_warn(x)             WARN_FORMAT; __print(x);
             #define log_warn_ln(x)          WARN_FORMAT; __println(x);
             #define logf_warn(x, args...)   WARN_FORMAT; __printf(x, args);
-            #define logf_P_warn(x, args...) WARN_FORMAT; __printf_P(x, args);
         #endif
         #if CRITICAL >= USE_LOG_LEVEL
             #ifndef CRITICAL_FORMAT
                 #ifdef MILLIS_FUNCTION
-                    #define CRITICAL_FORMAT __printf_P(PSTR("[CRITICAL] time: %lu; %s:%d\r\n\t"), MILLIS_FUNCTION(), __FILE__, __LINE__);
+                    #define CRITICAL_FORMAT __printf("[CRITICAL] time: %lu; %s:%d\r\n\t", MILLIS_FUNCTION(), __FILE__, __LINE__);
                 #else
-                    #define CRITICAL_FORMAT __printf(P_STR("[CRITICAL] %s:%s\r\n\t"), __FILE__, __LINE__);
+                    #define CRITICAL_FORMAT __printf("[CRITICAL] %s:%s\r\n\t", __FILE__, __LINE__);
                 #endif
             #endif
             #define log_critical(x)             CRITICAL_FORMAT; __print(x);
-            #define log_critical_ln(x)             CRITICAL_FORMAT; __println(x);
+            #define log_critical_ln(x)          CRITICAL_FORMAT; __println(x);
             #define logf_critical(x, args...)   CRITICAL_FORMAT; __printf(x, args);
-            #define logf_P_critical(x, args...) CRITICAL_FORMAT; __printf_P(x, args);
         #endif
     #else
         #ifndef log_begin
@@ -154,22 +141,18 @@
         #ifndef log_debug
             #define log_debug(x)
             #define logf_debug(x, args...)
-            #define logf_P_debug(x, args...)
         #endif
 
         #ifndef log_info
             #define log_info(x)
             #define logf_info(x, args...)
-            #define logf_P_info(x, args...)
         #endif
         #ifndef log_warn
             #define log_warn(x)
             #define logf_warn(x, args...)
-            #define logf_P_warn(x, args...)
         #endif
         #ifndef log_critical
             #define log_critical(x)
             #define logf_critical(x, args...)
-            #define logf_P_critical(x, args...)
         #endif
 #endif
